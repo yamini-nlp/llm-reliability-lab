@@ -1,9 +1,13 @@
-# LLM Reliability Lab — Medical QA Hallucination Benchmarking Platform
+# 🔬 LLM Reliability Lab — Medical QA Hallucination Benchmarking Platform
 
 > A systematic AI safety research platform for evaluating large language model reliability on medical question answering benchmarks, with structured hallucination detection and cross-model prompt strategy comparison.
 
-**Live Demo:** https://llm-reliability-lab.vercel.app  
-**Stack:** Next.js 15 · TypeScript · Groq Cloud API · Zustand · Recharts · Framer Motion · Tailwind CSS · Vercel
+**Live Demo:** https://llm-reliability-lab.vercel.app &nbsp;|&nbsp; **Write-up:** `/paper` (PDF + LaTeX source included)
+
+![Stack](https://img.shields.io/badge/Stack-Next.js%2015%20%7C%20TypeScript%20%7C%20Tailwind-blue?style=flat-square)
+![Models](https://img.shields.io/badge/Models-LLaMA3%20%7C%20Mixtral%20%7C%20Gemma2-orange?style=flat-square)
+![API](https://img.shields.io/badge/Inference-Groq%20Cloud%20API-purple?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Live-brightgreen?style=flat-square)
 
 ---
 
@@ -11,34 +15,29 @@
 
 LLM Reliability Lab is a browser-accessible evaluation platform that benchmarks LLM reliability on medical QA tasks. The system measures accuracy, classifies hallucination types, and compares prompt strategy effectiveness across multiple open-source model families via live Groq Cloud API inference — without requiring any local compute infrastructure.
 
-The platform is designed to make LLM evaluation reproducible and accessible: the full pipeline from configuration to hallucination inspection runs in the browser, and results are exportable as structured text reports.
+The full pipeline from configuration to hallucination inspection runs in the browser, and results are exportable as structured text reports. A structured write-up documenting the methodology, hallucination taxonomy, experimental design, and results is included in `/paper`.
 
 ---
 
-## Problem Statement
+## 🎯 Problem Statement
 
 LLMs are increasingly used in high-stakes domains including healthcare, clinical decision support, and medical education. Their tendency to generate confident but factually incorrect responses poses risks when deployed without systematic evaluation.
 
 Three specific gaps motivated this platform:
 
-1. Most benchmarks report aggregate accuracy only, without classifying how or why models fail
-2. Cross-model and cross-prompt comparisons are rarely conducted on identical question sets under identical conditions
-3. Existing evaluation tools require specialised infrastructure and are inaccessible to non-specialist researchers
+- Most benchmarks report aggregate accuracy only, without classifying **how or why** models fail
+- Cross-model and cross-prompt comparisons are rarely conducted on identical question sets under identical conditions
+- Existing evaluation tools require specialised infrastructure and are inaccessible to non-specialist researchers
 
 ---
 
-## Research Motivation
+## 💡 Key Finding
 
-The central finding from this benchmark: **prompt strategy is not cosmetic**. Chain-of-thought prompting reduces the hallucination rate to approximately half that of zero-shot on this benchmark. On a 20-question medical QA set:
-
-- LLaMA 3 70B zero-shot: 70% accuracy, 20% hallucination rate
-- LLaMA 3 70B chain-of-thought: 85% accuracy, 10% hallucination rate
-
-The gap between a 10% and 20% hallucination rate in a clinical tool is the difference between a research aid and a patient risk. This platform provides the infrastructure to quantify and communicate that gap.
+**Prompt strategy is not cosmetic.** Chain-of-thought prompting reduces the hallucination rate to approximately half that of zero-shot on this benchmark. On a 20-question medical QA set, LLaMA 3 70B moves from 20% hallucination rate (zero-shot) to 10% (chain-of-thought). In a clinical tool, the difference between a 10% and 20% hallucination rate is the difference between a research aid and a patient risk.
 
 ---
 
-## Dataset
+## 📋 Dataset
 
 **Primary benchmark:** 20 curated medical QA pairs with verified ground truth answers.
 
@@ -48,7 +47,7 @@ The gap between a 10% and 20% hallucination rate in a clinical tool is the diffe
 | Medium | 8 |
 | Hard | 4 |
 
-**Domain coverage:** clinical pharmacology · anatomy and physiology · disease pathophysiology · treatment protocols and clinical guidelines · biochemistry and genetics
+**Domain coverage:** clinical pharmacology · anatomy and physiology · disease pathophysiology · treatment protocols · biochemistry and genetics
 
 **Scoring pipeline:**
 
@@ -64,14 +63,14 @@ Token-Level Match Ratio   ρ = |{w ∈ K : w ∈ R}| / |K|
         ├── ρ ≥ 0.40  →  CORRECT
         │
         └── ρ < 0.40  →  INCORRECT → Hallucination Classification
-                                ├── Overconfident  (certainty markers + response length > 200 chars)
-                                ├── Fabricated     (zero keyword overlap + response length > 150 chars)
+                                ├── Overconfident  (certainty markers + response > 200 chars)
+                                ├── Fabricated     (zero keyword overlap + response > 150 chars)
                                 └── Factual Error  (all other incorrect responses)
 ```
 
 ---
 
-## System Architecture
+## 🏗️ System Architecture
 
 ```
 User Configuration (Model + Prompt Strategy + Sample Count)
@@ -88,12 +87,12 @@ Response Scoring ──► Keyword Match Ratio ──► Correct / Incorrect
 Zustand Global State ──► Results Dashboard ──► Charts + Report Export
 ```
 
-**Pages:**
+**Platform pages:**
 
 | Page | Function |
 |---|---|
-| Dataset Explorer | Browse all 20 QA samples with category/difficulty filters; select subsets |
-| Configure | Select model, prompt strategy, sample count, optional custom prompt override |
+| Dataset Explorer | Browse all 20 QA samples with category/difficulty filters |
+| Configure | Select model, prompt strategy, sample count, optional custom prompt |
 | Experiment Runner | Live Groq API calls with real-time per-question response display |
 | Results Dashboard | Accuracy bar charts, hallucination pie charts, radar performance view |
 | Hallucination Analysis | Side-by-side ground truth vs model output with type categorisation |
@@ -102,18 +101,18 @@ Zustand Global State ──► Results Dashboard ──► Charts + Report Expor
 
 ---
 
-## Models Supported
+## 🤖 Models Supported
 
 | Display Name | Groq Model ID | Characteristics |
 |---|---|---|
 | LLaMA 3 8B | `llama3-8b-8192` | Fast inference; suitable for high-volume evaluation runs |
 | LLaMA 3 70B | `llama3-70b-8192` | Higher accuracy; stronger on multi-step reasoning |
-| Mixtral 8x7B | `mixtral-8x7b-32768` | Mixture-of-experts architecture; strong on reasoning tasks |
+| Mixtral 8x7B | `mixtral-8x7b-32768` | Mixture-of-experts architecture; strong on reasoning |
 | Gemma 2 9B | `gemma2-9b-it` | Google instruction-tuned; efficient on factual QA |
 
 ---
 
-## Prompt Strategies
+## 📝 Prompt Strategies
 
 | Strategy | Description |
 |---|---|
@@ -123,7 +122,7 @@ Zustand Global State ──► Results Dashboard ──► Charts + Report Expor
 
 ---
 
-## Hallucination Taxonomy
+## 🔍 Hallucination Taxonomy
 
 | Type | Detection Criteria | Clinical Risk |
 |---|---|---|
@@ -133,7 +132,9 @@ Zustand Global State ──► Results Dashboard ──► Charts + Report Expor
 
 ---
 
-## Results (from published write-up; individual runs vary due to stochastic decoding)
+## 📊 Results
+
+*From the project write-up. Individual runs vary due to stochastic decoding.*
 
 **Accuracy and hallucination rate by model and prompt strategy:**
 
@@ -158,16 +159,16 @@ Zustand Global State ──► Results Dashboard ──► Charts + Report Expor
 | Chain-of-Thought | 2 | 0 | 0 | 2 |
 
 **Key observations:**
-- Chain-of-thought prompting eliminates fabricated and overconfident failures at this benchmark scale
+- Chain-of-thought eliminates fabricated and overconfident failures entirely at this benchmark scale
 - Structured prompting removes overconfident responses but does not improve factual recall
 - Hard-difficulty items (multi-hop clinical reasoning) show ~50% accuracy — the primary failure mode across all models
-- Consistency score (1 − hallucination rate) ranges from 0.70 to 0.90 across all conditions
+- Consistency score (1 − hallucination rate) ranges from 0.70 to 0.90 across all tested conditions
 
 ---
 
-## Limitations
+## ⚠️ Limitations
 
-- **Scoring heuristic:** keyword match ratio is an approximation — semantically correct responses worded differently may be penalised
+- **Scoring heuristic:** keyword match ratio may penalise semantically correct responses worded differently from the ground truth
 - **Small benchmark:** 20 QA samples limit statistical significance; results are directionally informative, not definitive
 - **No persistence:** experiment results are session-scoped and not saved across browser sessions
 - **Client-side API key:** Groq key is exposed via `NEXT_PUBLIC_` — not suitable for production without a server-side proxy
@@ -176,11 +177,11 @@ Zustand Global State ──► Results Dashboard ──► Charts + Report Expor
 
 ---
 
-## Future Work
+## 🔭 Future Work
 
 - Server-side API proxy to secure the Groq API key
 - Expand benchmark to 100+ QA pairs with source citations
-- Semantic similarity scoring via sentence embeddings alongside keyword match ratio
+- Semantic similarity scoring via sentence embeddings alongside keyword match
 - Cross-run persistence using PostgreSQL or Supabase
 - Support for fine-tuned medical LLMs (BioMedLM, Med-PaLM)
 - JSON / CSV export for downstream statistical analysis
@@ -189,13 +190,13 @@ Zustand Global State ──► Results Dashboard ──► Charts + Report Expor
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 | Layer | Technology |
 |---|---|
 | Framework | Next.js 15 (App Router, TypeScript) |
 | Styling | Tailwind CSS |
-| LLM Inference | Groq Cloud API (LLaMA 3 8B / 70B, Mixtral 8x7B, Gemma 2 9B) |
+| LLM Inference | Groq Cloud API (LLaMA 3, Mixtral 8x7B, Gemma 2) |
 | State Management | Zustand |
 | Charts | Recharts |
 | Animations | Framer Motion |
@@ -204,7 +205,7 @@ Zustand Global State ──► Results Dashboard ──► Charts + Report Expor
 
 ---
 
-## Local Setup
+## 🚀 Local Setup
 
 **Prerequisites:** Node.js ≥ 18 · Groq API key (free at [console.groq.com](https://console.groq.com))
 
@@ -233,36 +234,36 @@ npm run dev
 Visit `http://localhost:3000`
 
 **5. Run an experiment**
-- Go to **Dataset** → browse and optionally filter questions
-- Go to **Configure** → choose model, prompt strategy, and sample count
-- Go to **Experiment** → click Start Experiment and observe results stream live
-- Navigate to **Results**, **Hallucination**, and **Insights** pages for full analysis
+- **Dataset** → browse and optionally filter questions by difficulty or domain
+- **Configure** → choose model, prompt strategy, and sample count
+- **Experiment** → click Start and observe results stream live
+- **Results / Hallucination / Insights** → full analysis and report export
 
 ---
 
-## Repository Structure
+## 📁 Repository Structure
 
 ```
 llm-reliability-lab/
 ├── app/
-│   ├── page.tsx                  # Landing page
-│   ├── dataset/                  # Dataset explorer
-│   ├── configure/                # Experiment configuration
-│   ├── experiment/               # Live Groq inference runner
-│   ├── results/                  # Accuracy and hallucination charts
-│   ├── hallucination/            # Side-by-side analysis
-│   ├── insights/                 # Report generation
-│   └── ethics/                   # Responsible AI disclosure
+│   ├── page.tsx              # Landing page
+│   ├── dataset/              # Dataset explorer
+│   ├── configure/            # Experiment configuration
+│   ├── experiment/           # Live Groq inference runner
+│   ├── results/              # Accuracy and hallucination charts
+│   ├── hallucination/        # Side-by-side analysis
+│   ├── insights/             # Report generation
+│   └── ethics/               # Responsible AI disclosure
 ├── lib/
-│   ├── groq.ts                   # Groq API client
-│   ├── scoring.ts                # Keyword match ratio + hallucination classification
-│   └── store.ts                  # Zustand global experiment state
+│   ├── groq.ts               # Groq API client
+│   ├── scoring.ts            # Keyword match ratio + hallucination classification
+│   └── store.ts              # Zustand global experiment state
 ├── data/
-│   └── questions.ts              # 20 curated medical QA pairs
-├── paper/                        # Project write-up (PDF + LaTeX source)
+│   └── questions.ts          # 20 curated medical QA pairs with ground truth
+├── paper/                    # Project write-up (PDF + LaTeX source)
 └── README.md
 ```
 
 ---
 
-*Built by Yamini G · [GitHub](https://github.com/yamireddy04/llm-reliability-lab) · [Live Demo](https://llm-reliability-lab.vercel.app)*
+*Built by Yamini G &nbsp;·&nbsp; [GitHub](https://github.com/yamireddy04/llm-reliability-lab) &nbsp;·&nbsp; [Live Demo](https://llm-reliability-lab.vercel.app)*
