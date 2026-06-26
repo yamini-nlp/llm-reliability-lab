@@ -2,7 +2,7 @@
 
 > A systematic AI safety research platform for evaluating large language model reliability on medical question answering benchmarks, with structured hallucination detection and cross-model prompt strategy comparison.
 
-** Live Demo:** https://llm-reliability-lab.vercel.app &nbsp;|&nbsp; **Write-up:** [paper/LLM.pdf](paper/LLM.pdf)
+**Live Demo:** https://llm-reliability-lab.vercel.app &nbsp;|&nbsp; **Write-up:** [paper/LLM.pdf](paper/LLM.pdf)
 
 ![Stack](https://img.shields.io/badge/Stack-Next.js%2015%20%7C%20TypeScript%20%7C%20Tailwind-blue?style=flat-square)
 ![Models](https://img.shields.io/badge/Models-LLaMA3%20%7C%20Mixtral%20%7C%20Gemma2-orange?style=flat-square)
@@ -277,6 +277,9 @@ llm-reliability-lab/
 └── README.md
 ```
 
----
+
+<div align="center">
 
 *Built by Yamini G &nbsp;·&nbsp; [GitHub](https://github.com/yamireddy04/llm-reliability-lab) &nbsp;·&nbsp; [Live Demo](https://llm-reliability-lab.vercel.app)*
+
+</div>
