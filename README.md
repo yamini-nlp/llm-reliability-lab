@@ -2,7 +2,7 @@
 
 > A systematic AI safety research platform for evaluating large language model reliability on medical question answering benchmarks, with structured hallucination detection and cross-model prompt strategy comparison.
 
-**Live Demo:** https://llm-reliability-lab.vercel.app &nbsp;|&nbsp; **Write-up:** `/paper` (PDF + LaTeX source included)
+** Live Demo:** https://llm-reliability-lab.vercel.app &nbsp;|&nbsp; **Write-up:** [paper/LLM.pdf](paper/LLM.pdf)
 
 ![Stack](https://img.shields.io/badge/Stack-Next.js%2015%20%7C%20TypeScript%20%7C%20Tailwind-blue?style=flat-square)
 ![Models](https://img.shields.io/badge/Models-LLaMA3%20%7C%20Mixtral%20%7C%20Gemma2-orange?style=flat-square)
@@ -245,22 +245,35 @@ Visit `http://localhost:3000`
 
 ```
 llm-reliability-lab/
-├── app/
-│   ├── page.tsx              # Landing page
-│   ├── dataset/              # Dataset explorer
-│   ├── configure/            # Experiment configuration
-│   ├── experiment/           # Live Groq inference runner
-│   ├── results/              # Accuracy and hallucination charts
-│   ├── hallucination/        # Side-by-side analysis
-│   ├── insights/             # Report generation
-│   └── ethics/               # Responsible AI disclosure
-├── lib/
-│   ├── groq.ts               # Groq API client
-│   ├── scoring.ts            # Keyword match ratio + hallucination classification
-│   └── store.ts              # Zustand global experiment state
-├── data/
-│   └── questions.ts          # 20 curated medical QA pairs with ground truth
-├── paper/                    # Project write-up (PDF + LaTeX source)
+├── src/
+│   ├── app/
+│   │   ├── page.tsx                # Landing page (hero, terminal animation, overview)
+│   │   ├── layout.tsx              # Root layout + global metadata
+│   │   ├── globals.css             # Tailwind global styles
+│   │   ├── configure/
+│   │   │   └── page.tsx            # Model, prompt strategy, sample count selection
+│   │   ├── dataset/
+│   │   │   └── page.tsx            # Medical QA dataset explorer with filters
+│   │   ├── experiment/
+│   │   │   └── page.tsx            # Live Groq API experiment runner
+│   │   ├── results/
+│   │   │   └── page.tsx            # Accuracy, hallucination, and radar charts (Recharts)
+│   │   ├── hallucination/
+│   │   │   └── page.tsx            # Ground truth vs model output, type breakdown
+│   │   ├── insights/
+│   │   │   └── page.tsx            # Research-style summary + TXT report export
+│   │   └── ethics/
+│   │       └── page.tsx            # Risk analysis + responsible AI principles
+│   ├── components/
+│   │   └── Navbar.tsx              # Site navigation
+│   └── lib/
+│       ├── data.ts                 # Medical QA dataset + type definitions
+│       └── store.ts                # Zustand global experiment state
+├── public/                         # Static assets (SVG icons)
+├── next.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+├── package.json
 └── README.md
 ```
 
