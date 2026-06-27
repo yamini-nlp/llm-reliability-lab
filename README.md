@@ -211,7 +211,7 @@ Zustand Global State ──► Results Dashboard ──► Charts + Report Expor
 
 **1. Clone**
 ```bash
-git clone https://github.com/yamireddy04/llm-reliability-lab.git
+git clone https://github.com/yamini-nlp/llm-reliability-lab.git
 cd llm-reliability-lab
 ```
 
