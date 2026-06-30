@@ -2,11 +2,12 @@
 import Link from "next/link";
 import { ArrowRight, Brain, ShieldAlert, BarChart3, Microscope, Zap, GitCompare, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { medicalDataset } from "@/lib/data";
 
 const terminalLines = [
   "$ initializing llm-reliability-lab...",
-  "$ loading medical QA dataset [20 samples]",
-  "$ connecting to claude-sonnet-4...",
+  `$ loading medical QA dataset [${medicalDataset.length} samples]`,
+  "$ connecting to groq cloud api...",
   "$ prompt strategy: chain-of-thought",
   "$ running evaluation pipeline...",
   "> accuracy: 0.82 | hallucination_rate: 0.11",
@@ -119,9 +120,7 @@ const steps = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen">
-      {/* Hero */}
       <section className="relative px-6 pt-20 pb-24 max-w-7xl mx-auto">
-        {/* Background glow */}
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-20 left-1/4 w-[300px] h-[200px] bg-accent2/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -156,7 +155,7 @@ export default function LandingPage() {
             </div>
 
             <div className="flex items-center gap-6 mt-8 text-xs font-mono text-muted">
-              <span>20 QA samples</span>
+              <span>{`${medicalDataset.length} QA samples`}</span>
               <span className="text-border">|</span>
               <span>3 prompt strategies</span>
               <span className="text-border">|</span>
@@ -170,7 +169,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features */}
       <section className="px-6 py-16 max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="font-display text-2xl font-bold text-white mb-3">
@@ -198,7 +196,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How it works */}
       <section className="px-6 py-16 max-w-7xl mx-auto border-t border-border">
         <div className="text-center mb-12">
           <h2 className="font-display text-2xl font-bold text-white mb-3">
@@ -234,7 +231,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Why it matters */}
       <section className="px-6 py-16 max-w-7xl mx-auto border-t border-border">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
@@ -267,7 +263,7 @@ export default function LandingPage() {
               { label: "Avg. Accuracy", value: "82%", color: "text-accent3" },
               { label: "Hallucination Rate", value: "11%", color: "text-danger" },
               { label: "Consistency Score", value: "0.91", color: "text-accent" },
-              { label: "Questions Tested", value: "20", color: "text-accent2" },
+              { label: "Questions Tested", value: medicalDataset.length.toString(), color: "text-accent2" },
             ].map((stat, i) => (
               <div
                 key={i}
@@ -283,7 +279,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="px-6 py-16 max-w-7xl mx-auto">
         <div className="rounded-2xl border border-accent/20 bg-accent/5 p-10 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-accent2/5 pointer-events-none" />
@@ -304,7 +299,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-border px-6 py-8 text-center text-muted text-xs font-mono">
         <p>LLM Reliability Lab — AI Safety Research · Built with Next.js + Anthropic API</p>
       </footer>

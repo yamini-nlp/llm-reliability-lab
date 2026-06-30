@@ -4,11 +4,8 @@ import { useAppStore } from "@/lib/store";
 import { medicalDataset, ExperimentResult } from "@/lib/data";
 import { useRouter } from "next/navigation";
 import { Play, Square, RotateCcw, CheckCircle, XCircle, AlertTriangle, Loader2, ArrowRight } from "lucide-react";
-import Groq from "groq-sdk";
-const groq = new Groq({
-  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY!,
-  dangerouslyAllowBrowser: true, 
-});
+import { judgeResponse } from "@/lib/judge";
+
 function buildPrompt(question: string, strategy: string, custom?: string): string {
   if (custom && custom.trim()) return custom.replace("{question}", question);
   switch (strategy) {
@@ -131,21 +128,30 @@ export default function ExperimentPage() {
           const groqModel = GROQ_MODEL_MAP[config.model];
           const prompt = buildPrompt(q.question, config.promptStrategy, config.customPrompt);
 
-          const completion = await groq.chat.completions.create({
-            model: groqModel,
-            max_tokens: 1000,
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are a concise medical expert. Answer questions accurately and briefly.",
-              },
-              { role: "user", content: prompt },
-            ],
+          const res = await fetch("/api/groq", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: groqModel,
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "You are a concise medical expert. Answer questions accurately and briefly.",
+                },
+                { role: "user", content: prompt },
+              ],
+              max_tokens: 1000,
+            }),
           });
 
-          modelResponse =
-            completion.choices[0]?.message?.content?.trim() ?? "No response from model.";
+          const parsed = await res.json();
+
+          if (!res.ok) {
+            throw new Error(parsed.error);
+          }
+
+          modelResponse = parsed.content || "No response from model.";
         } else {
           await new Promise((r) => setTimeout(r, 800 + Math.random() * 600));
           modelResponse = getMockResponse(q.question, config.model, q.answer);
@@ -163,6 +169,10 @@ export default function ExperimentPage() {
         q.answer
       );
 
+      const judgeResult = GROQ_MODELS.has(config.model)
+        ? await judgeResponse(q.question, q.answer, modelResponse)
+        : { semanticCorrect: undefined, judgeConfidence: undefined, judgeRationale: undefined };
+
       const result: ExperimentResult = {
         questionId: q.id,
         question: q.question,
@@ -173,6 +183,10 @@ export default function ExperimentPage() {
         hallucinationType,
         model: config.model,
         promptStrategy: config.promptStrategy,
+        ambiguityType: q.ambiguityType,
+        semanticCorrect: judgeResult.semanticCorrect,
+        judgeConfidence: judgeResult.judgeConfidence,
+        judgeRationale: judgeResult.judgeRationale,
       };
 
       addResult(result);
@@ -215,22 +229,12 @@ export default function ExperimentPage() {
         </p>
       </div>
 
-      {/* API key warning */}
-      {!process.env.NEXT_PUBLIC_GROQ_API_KEY && (
-        <div className="mb-4 p-4 rounded-xl border border-warn/30 bg-warn/5 text-warn text-xs font-mono">
-          ⚠ NEXT_PUBLIC_GROQ_API_KEY is not set. Add it to your .env.local file and restart the
-          dev server.
-        </div>
-      )}
-
-      {/* API error banner */}
       {apiError && (
         <div className="mb-4 p-4 rounded-xl border border-danger/30 bg-danger/5 text-danger text-xs font-mono">
           ⚠ {apiError}
         </div>
       )}
 
-      {/* Controls */}
       <div className="flex items-center gap-3 mb-6">
         {!isRunning && !done && (
           <button
@@ -264,7 +268,6 @@ export default function ExperimentPage() {
         )}
       </div>
 
-      {/* Progress bar */}
       <div className="mb-6">
         <div className="flex justify-between text-xs font-mono text-muted mb-2">
           <span>
@@ -284,7 +287,6 @@ export default function ExperimentPage() {
         </div>
       </div>
 
-      {/* Current question live view */}
       {currentQ && (
         <div className="mb-6 p-5 rounded-xl border border-accent/20 bg-accent/5 scan-line relative overflow-hidden">
           <div className="flex items-center gap-2 mb-3">
@@ -307,7 +309,6 @@ export default function ExperimentPage() {
         </div>
       )}
 
-      {/* Results stream */}
       <div className="space-y-2">
         {results.map((r, i) => (
           <div
@@ -343,6 +344,11 @@ export default function ExperimentPage() {
                   {r.isCorrect && (
                     <span className="text-[9px] font-mono text-accent3">CORRECT</span>
                   )}
+                  {r.semanticCorrect !== undefined && r.semanticCorrect !== r.isCorrect && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-warn/30 text-warn bg-warn/10">
+                      JUDGE DISAGREES
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-dim truncate">{r.question}</p>
                 <div className="mt-1 text-[10px] font-mono">
@@ -355,7 +361,6 @@ export default function ExperimentPage() {
         ))}
       </div>
 
-      {/* Done summary */}
       {done && results.length > 0 && (
         <div className="mt-6 p-5 rounded-xl border border-accent/20 bg-surface/50">
           <h3 className="font-display font-semibold text-white text-sm mb-4">Quick Summary</h3>

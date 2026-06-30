@@ -2,6 +2,7 @@
 import { useAppStore } from "@/lib/store";
 import Link from "next/link";
 import { FileText, Download, TrendingUp, ArrowRight } from "lucide-react";
+import { accuracyByGroup } from "@/lib/stats";
 
 export default function InsightsPage() {
   const { results } = useAppStore();
@@ -11,6 +12,13 @@ export default function InsightsPage() {
   const hallucinated = results.filter((r) => r.isHallucination).length;
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
   const hallucinationRate = total > 0 ? Math.round((hallucinated / total) * 100) : 0;
+  const overallStats = accuracyByGroup(results);
+  const preciseStats = accuracyByGroup(results.filter((r) => r.ambiguityType === "precise"));
+  const ambiguousStats = accuracyByGroup(results.filter((r) => r.ambiguityType === "ambiguous"));
+  const judgedCount = results.filter((r) => r.semanticCorrect !== undefined).length;
+  const agreementCount = results.filter((r) => r.semanticCorrect !== undefined && r.semanticCorrect === r.isCorrect).length;
+  const agreementRate = judgedCount > 0 ? Math.round((agreementCount / judgedCount) * 100) : null;
+  const disagreementCases = results.filter((r) => r.semanticCorrect !== undefined && r.semanticCorrect !== r.isCorrect);
 
   const handleDownload = () => {
     const report = `LLM RELIABILITY LAB — RESEARCH REPORT
@@ -24,12 +32,23 @@ Total Questions: ${total}
 KEY METRICS
 Accuracy: ${accuracy}%
 Hallucination Rate: ${hallucinationRate}%
-Consistency Score: ${(0.95 - hallucinationRate / 1000).toFixed(2)}
+Accuracy 95% CI: ${overallStats.lower}%-${overallStats.upper}%
 
 HALLUCINATION BREAKDOWN
 Factual Errors: ${results.filter((r) => r.hallucinationType === "factual_error").length}
 Fabricated Information: ${results.filter((r) => r.hallucinationType === "fabricated").length}
 Overconfident Wrong: ${results.filter((r) => r.hallucinationType === "overconfident").length}
+
+ACCURACY BY QUESTION PHRASING
+Precise phrasing: ${preciseStats.rate}% (${preciseStats.lower}-${preciseStats.upper}%), n=${preciseStats.n}
+Ambiguous phrasing: ${ambiguousStats.rate}% (${ambiguousStats.lower}-${ambiguousStats.upper}%), n=${ambiguousStats.n}
+
+SCORING METHOD VALIDITY
+Judged Responses: ${judgedCount}
+Agreement Count: ${agreementCount}
+Agreement Rate: ${agreementRate !== null ? `${agreementRate}%` : "N/A"}
+Disagreement Cases:
+${disagreementCases.map((r) => `- Q: ${r.question} | Judge: ${r.judgeRationale}`).join("\n")}
 
 DETAILED RESULTS
 ${results.map((r, i) => `
@@ -91,9 +110,7 @@ LLM Reliability Lab | AI Safety Research
         </div>
       )}
 
-      {/* Paper-style layout */}
       <div className="space-y-6">
-        {/* Abstract */}
         <section className="p-6 rounded-xl border border-border bg-surface/50">
           <div className="text-[10px] font-mono text-accent mb-3 uppercase tracking-widest">Abstract</div>
           <p className="text-sm text-dim leading-7">
@@ -103,11 +120,12 @@ LLM Reliability Lab | AI Safety Research
             prompting strategies across {total} clinically relevant questions spanning pharmacology,
             anatomy, microbiology, and clinical reasoning. Our evaluation framework measures accuracy,
             hallucination rate, and response consistency — metrics critical for safe AI deployment in
-            healthcare contexts.
+            healthcare contexts. Response correctness is assessed using both a keyword-overlap heuristic
+            and an LLM-as-judge semantic comparison, with agreement between the two reported as a measure
+            of scoring validity.
           </p>
         </section>
 
-        {/* Major findings */}
         <section className="p-6 rounded-xl border border-border bg-surface/50">
           <div className="text-[10px] font-mono text-accent mb-3 uppercase tracking-widest">Key Findings</div>
           <div className="space-y-4">
@@ -128,15 +146,23 @@ LLM Reliability Lab | AI Safety Research
               },
               {
                 num: "03",
-                title: "Prompt Strategy Effectiveness",
-                desc: "Chain-of-thought prompting consistently outperforms zero-shot on multi-step reasoning questions. Structured prompts with role-setting improved factual precision by reducing speculative language.",
+                title: "Accuracy by Question Phrasing",
+                desc: `Precise-phrasing questions (n=${preciseStats.n}) achieved ${preciseStats.rate}% accuracy (${preciseStats.lower}-${preciseStats.upper}% CI), while ambiguous-phrasing questions (n=${ambiguousStats.n}) achieved ${ambiguousStats.rate}% accuracy (${ambiguousStats.lower}-${ambiguousStats.upper}% CI).`,
                 color: "text-accent",
               },
               {
                 num: "04",
                 title: "Hallucination Pattern Analysis",
-                desc: `The most common failure mode was factual error (${results.filter((r) => r.hallucinationType === "factual_error").length} cases), followed by fabricated information (${results.filter((r) => r.hallucinationType === "fabricated").length} cases). Overconfident wrong answers represent the highest safety risk.`,
+                desc: `The most common failure mode was factual error (${results.filter((r) => r.hallucinationType === "factual_error").length} cases), followed by fabricated information (${results.filter((r) => r.hallucinationType === "fabricated").length} cases).`,
                 color: "text-accent2",
+              },
+              {
+                num: "05",
+                title: "Measurement Validity",
+                desc: agreementRate !== null
+                  ? `Keyword-match scoring and the LLM-as-judge semantic comparison agreed on ${agreementRate}% of judged responses (${agreementCount}/${judgedCount}). Disagreements indicate where keyword matching would have mis-scored a response.`
+                  : "No judged responses are available to assess agreement between scoring methods.",
+                color: "text-accent3",
               },
             ].map((f, i) => (
               <div key={i} className="flex gap-4">
@@ -150,7 +176,6 @@ LLM Reliability Lab | AI Safety Research
           </div>
         </section>
 
-        {/* Recommendations */}
         <section className="p-6 rounded-xl border border-accent/20 bg-accent/5">
           <div className="text-[10px] font-mono text-accent mb-3 uppercase tracking-widest">Recommendations</div>
           <ul className="space-y-2">
@@ -169,7 +194,6 @@ LLM Reliability Lab | AI Safety Research
           </ul>
         </section>
 
-        {/* Conclusion */}
         <section className="p-6 rounded-xl border border-border bg-surface/50">
           <div className="text-[10px] font-mono text-accent mb-3 uppercase tracking-widest">Conclusion</div>
           <p className="text-sm text-dim leading-7">
@@ -179,11 +203,10 @@ LLM Reliability Lab | AI Safety Research
           </p>
         </section>
 
-        {/* Citation */}
         <section className="p-4 rounded-xl border border-border bg-surface/30">
           <div className="text-[10px] font-mono text-muted mb-2">CITATION</div>
           <p className="text-[11px] font-mono text-muted leading-relaxed">
-            LLM Reliability Lab. ({new Date().getFullYear()}). Evaluating Large Language Model Reliability in Medical Question Answering. Research Prototype. Built with Next.js + Anthropic API.
+            LLM Reliability Lab. ({new Date().getFullYear()}). Evaluating Large Language Model Reliability in Medical Question Answering. Research Prototype. Built with Next.js + Groq Cloud API.
           </p>
         </section>
       </div>

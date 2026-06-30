@@ -6,6 +6,7 @@ import {
   PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
 } from "recharts";
 import { BarChart3, AlertTriangle, CheckCircle, TrendingUp, ArrowRight } from "lucide-react";
+import { accuracyByGroup } from "@/lib/stats";
 
 const COLORS = ["#6ee7f7", "#f87171", "#a78bfa", "#34d399", "#f59e0b"];
 
@@ -30,7 +31,7 @@ export default function ResultsPage() {
   const hallucinated = results.filter((r) => r.isHallucination).length;
   const accuracy = Math.round((correct / total) * 100);
   const hallucinationRate = Math.round((hallucinated / total) * 100);
-  const consistencyScore = (0.95 - hallucinationRate / 1000).toFixed(2);
+  const overallStats = accuracyByGroup(results);
 
   const halTypes = ["factual_error", "fabricated", "overconfident"].map((t) => ({
     name: t.replace("_", " "),
@@ -52,10 +53,18 @@ export default function ResultsPage() {
   const radarData = [
     { metric: "Accuracy", value: accuracy },
     { metric: "Low Halluc.", value: 100 - hallucinationRate },
-    { metric: "Consistency", value: parseFloat(consistencyScore) * 100 },
+    { metric: "Consistency", value: overallStats.rate },
     { metric: "Coverage", value: Math.round((total / 20) * 100) },
     { metric: "Confidence", value: 75 },
   ];
+
+  const preciseStats = accuracyByGroup(results.filter((r) => r.ambiguityType === "precise"));
+  const ambiguousStats = accuracyByGroup(results.filter((r) => r.ambiguityType === "ambiguous"));
+
+  const judgedCount = results.filter((r) => r.semanticCorrect !== undefined).length;
+  const agreementCount = results.filter((r) => r.semanticCorrect !== undefined && r.semanticCorrect === r.isCorrect).length;
+  const agreementRate = judgedCount > 0 ? Math.round((agreementCount / judgedCount) * 100) : null;
+  const disagreementCases = results.filter((r) => r.semanticCorrect !== undefined && r.semanticCorrect !== r.isCorrect).slice(0, 3);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
@@ -67,12 +76,11 @@ export default function ResultsPage() {
         <p className="text-dim text-sm">{total} questions evaluated · {results[0]?.model} · {results[0]?.promptStrategy}</p>
       </div>
 
-      {/* Key metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           { label: "Accuracy", value: `${accuracy}%`, icon: <CheckCircle size={16} />, color: "text-accent3", border: "border-accent3/20", bg: "bg-accent3/5" },
           { label: "Hallucination Rate", value: `${hallucinationRate}%`, icon: <AlertTriangle size={16} />, color: "text-danger", border: "border-danger/20", bg: "bg-danger/5" },
-          { label: "Consistency Score", value: consistencyScore, icon: <TrendingUp size={16} />, color: "text-accent", border: "border-accent/20", bg: "bg-accent/5" },
+          { label: "Accuracy (95% CI)", value: `${overallStats.rate}% (${overallStats.lower}-${overallStats.upper}%)`, icon: <TrendingUp size={16} />, color: "text-accent", border: "border-accent/20", bg: "bg-accent/5" },
           { label: "Questions Tested", value: total, icon: <BarChart3 size={16} />, color: "text-accent2", border: "border-accent2/20", bg: "bg-accent2/5" },
         ].map((m, i) => (
           <div key={i} className={`p-5 rounded-xl border ${m.border} ${m.bg}`}>
@@ -85,9 +93,7 @@ export default function ResultsPage() {
         ))}
       </div>
 
-      {/* Charts */}
       <div className="grid md:grid-cols-2 gap-6 mb-8">
-        {/* Accuracy by prompt */}
         <div className="p-5 rounded-xl border border-border bg-surface/50">
           <h3 className="font-display font-semibold text-white text-sm mb-4">Accuracy by Prompt Strategy</h3>
           <ResponsiveContainer width="100%" height={220}>
@@ -105,7 +111,6 @@ export default function ResultsPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Hallucination types */}
         <div className="p-5 rounded-xl border border-border bg-surface/50">
           <h3 className="font-display font-semibold text-white text-sm mb-4">Hallucination Type Distribution</h3>
           {halTypes.length > 0 ? (
@@ -129,7 +134,6 @@ export default function ResultsPage() {
           )}
         </div>
 
-        {/* Radar */}
         <div className="p-5 rounded-xl border border-border bg-surface/50">
           <h3 className="font-display font-semibold text-white text-sm mb-4">Performance Radar</h3>
           <ResponsiveContainer width="100%" height={220}>
@@ -141,7 +145,6 @@ export default function ResultsPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Result breakdown */}
         <div className="p-5 rounded-xl border border-border bg-surface/50">
           <h3 className="font-display font-semibold text-white text-sm mb-4">Answer Breakdown</h3>
           <div className="space-y-3">
@@ -175,6 +178,57 @@ export default function ResultsPage() {
             </ul>
           </div>
         </div>
+      </div>
+
+      <div className="mb-8 p-5 rounded-xl border border-border bg-surface/50">
+        <h3 className="font-display font-semibold text-white text-sm mb-4">Accuracy by Question Phrasing</h3>
+        <div className="space-y-3">
+          {[
+            { label: "Precise phrasing", stats: preciseStats },
+            { label: "Ambiguous phrasing", stats: ambiguousStats },
+          ].map((item, i) => (
+            <div key={i} className="flex items-center justify-between text-xs font-mono">
+              <span className="text-dim">{item.label}</span>
+              <span className="text-text">
+                {item.stats.rate}% ({item.stats.lower}-{item.stats.upper}%) · n={item.stats.n}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-8 p-5 rounded-xl border border-border bg-surface/50">
+        <h3 className="font-display font-semibold text-white text-sm mb-4">Scoring Method Agreement</h3>
+        <div className="text-sm font-mono mb-2">
+          <span className="text-text">
+            {agreementRate !== null ? `${agreementRate}%` : "N/A"}
+          </span>
+          <span className="text-muted"> agreement between keyword-match and semantic judge ({agreementCount}/{judgedCount})</span>
+        </div>
+        <p className="text-xs text-dim mb-4">
+          Cases where keyword-match and semantic judge disagree indicate where surface-level scoring would have misclassified the response.
+        </p>
+        {disagreementCases.length > 0 && (
+          <div className="space-y-3">
+            {disagreementCases.map((r, i) => (
+              <div key={i} className="p-3 rounded-lg bg-bg border border-border">
+                <p className="text-xs text-text font-medium mb-1">{r.question}</p>
+                <div className="text-[10px] font-mono text-muted mb-1">
+                  <span className="text-muted">GT: </span>
+                  <span className="text-text">{r.groundTruth}</span>
+                </div>
+                <div className="text-[10px] font-mono text-muted mb-1">
+                  <span className="text-muted">Response: </span>
+                  <span className="text-text">{r.modelResponse.substring(0, 150)}</span>
+                </div>
+                <div className="text-[10px] font-mono text-warn">
+                  <span className="text-muted">Judge: </span>
+                  {r.judgeRationale}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex gap-3">

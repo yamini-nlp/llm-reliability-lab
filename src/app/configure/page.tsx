@@ -69,7 +69,6 @@ export default function ConfigurePage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-accent text-xs font-mono mb-2">
           <Settings size={12} /> experiment configurator
@@ -83,7 +82,6 @@ export default function ConfigurePage() {
       </div>
 
       <div className="space-y-8">
-        {/* Model Selection */}
         <div>
           <div className="flex items-center gap-2 mb-4">
             <Cpu size={15} className="text-accent" />
@@ -124,7 +122,6 @@ export default function ConfigurePage() {
           </div>
         </div>
 
-        {/* Prompt Strategy */}
         <div>
           <div className="flex items-center gap-2 mb-4">
             <MessageSquare size={15} className="text-accent2" />
@@ -156,7 +153,6 @@ export default function ConfigurePage() {
           </div>
         </div>
 
-        {/* Custom prompt */}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <MessageSquare size={15} className="text-muted" />
@@ -174,7 +170,6 @@ export default function ConfigurePage() {
           />
         </div>
 
-        {/* Sample count */}
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Hash size={15} className="text-accent3" />
@@ -184,7 +179,7 @@ export default function ConfigurePage() {
           <input
             type="range"
             min={1}
-            max={20}
+            max={medicalDataset.length}
             value={config.sampleCount}
             onChange={(e) => setConfig({ sampleCount: parseInt(e.target.value) })}
             className="w-full accent-[#6ee7f7]"
@@ -192,11 +187,10 @@ export default function ConfigurePage() {
           <div className="flex justify-between text-[10px] font-mono text-muted mt-1">
             <span>1 (quick)</span>
             <span>10 (balanced)</span>
-            <span>20 (full)</span>
+            <span>{`${medicalDataset.length} (full)`}</span>
           </div>
         </div>
 
-        {/* Summary & Launch */}
         <div className="p-5 rounded-xl border border-accent/20 bg-accent/5">
           <h3 className="font-display font-semibold text-white text-sm mb-3">Experiment Summary</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
