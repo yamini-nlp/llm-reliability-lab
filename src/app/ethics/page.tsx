@@ -52,7 +52,6 @@ const principles = [
 export default function EthicsPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
-      {/* Header */}
       <div className="mb-10">
         <div className="flex items-center gap-2 text-accent text-xs font-mono mb-2">
           <ShieldAlert size={12} /> ethics & about
@@ -66,7 +65,6 @@ export default function EthicsPage() {
         </p>
       </div>
 
-      {/* Risk analysis */}
       <section className="mb-10">
         <h2 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
           <AlertTriangle size={18} className="text-danger" /> Risk Analysis
@@ -91,7 +89,6 @@ export default function EthicsPage() {
         </div>
       </section>
 
-      {/* Principles */}
       <section className="mb-10">
         <h2 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
           <Heart size={18} className="text-accent" /> Ethical Principles
@@ -108,7 +105,6 @@ export default function EthicsPage() {
         </div>
       </section>
 
-      {/* Disclaimer */}
       <section className="mb-10">
         <div className="p-5 rounded-xl border border-danger/20 bg-danger/5">
           <div className="flex items-center gap-2 mb-3">
@@ -123,7 +119,6 @@ export default function EthicsPage() {
         </div>
       </section>
 
-      {/* About project */}
       <section className="mb-10">
         <h2 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
           <Brain size={18} className="text-accent2" /> About This Project
@@ -146,13 +141,12 @@ export default function EthicsPage() {
         </div>
       </section>
 
-      {/* Tech stack */}
       <section>
         <h2 className="font-display text-xl font-bold text-white mb-4">Technology Stack</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { name: "Next.js 15", role: "Frontend Framework" },
-            { name: "Anthropic API", role: "LLM Backend" },
+            { name: "Groq Cloud API", role: "LLM Backend" },
             { name: "Recharts", role: "Data Visualization" },
             { name: "Zustand", role: "State Management" },
             { name: "Tailwind CSS", role: "UI Styling" },

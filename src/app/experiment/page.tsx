@@ -68,14 +68,17 @@ function getMockResponse(question: string, model: string, groundTruth: string): 
       );
     return "The treatment involves multiple factors and clinical judgment. Generally speaking, the standard approach involves supportive care and specialist referral.";
   }
-  return groundTruth;
+  if (model === "oracle") {
+    return groundTruth;
+  }
+  throw new Error(`getMockResponse called with unrecognized model id: "${model}"`);
 }
 
 const GROQ_MODEL_MAP: Record<string, string> = {
-  "llama3-8b":   "llama3-8b-8192",
-  "llama3-70b":  "llama3-70b-8192",
-  "mixtral":     "mixtral-8x7b-32768",
-  "gemma2":      "gemma2-9b-it",
+  "llama3-8b":    "llama-3.1-8b-instant",
+  "llama3-70b":   "llama-3.3-70b-versatile",
+  "gpt-oss-120b": "openai/gpt-oss-120b",
+  "gpt-oss-20b":  "openai/gpt-oss-20b",
 };
 
 const GROQ_MODELS = new Set(Object.keys(GROQ_MODEL_MAP));

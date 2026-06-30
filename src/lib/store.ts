@@ -21,7 +21,7 @@ interface AppStore {
 
 export const useAppStore = create<AppStore>((set) => ({
   config: {
-    model: "claude-sonnet",
+    model: "llama3-8b",
     promptStrategy: "zero-shot",
     sampleCount: 5,
     customPrompt: "",

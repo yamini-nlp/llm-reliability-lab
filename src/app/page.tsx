@@ -300,7 +300,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="border-t border-border px-6 py-8 text-center text-muted text-xs font-mono">
-        <p>LLM Reliability Lab — AI Safety Research · Built with Next.js + Anthropic API</p>
+      <p>LLM Reliability Lab — AI Safety Research · Built with Next.js + Groq Cloud API</p>
       </footer>
     </div>
   );

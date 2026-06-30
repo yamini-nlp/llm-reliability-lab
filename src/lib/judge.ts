@@ -2,7 +2,7 @@ export async function judgeResponse(
     question: string,
     groundTruth: string,
     modelResponse: string,
-    judgeModel = "llama3-70b-8192"
+    judgeModel = "llama-3.3-70b-versatile"
   ): Promise<{ semanticCorrect: boolean; judgeConfidence: number; judgeRationale: string }> {
     try {
       const prompt = `You are grading a medical question answer for semantic correctness.

@@ -6,10 +6,26 @@ import { Settings, Cpu, MessageSquare, Hash, ArrowRight, ChevronRight } from "lu
 
 const models = [
   {
-    id: "claude-sonnet",
-    name: "Claude Sonnet 4",
-    provider: "Anthropic",
-    desc: "High-accuracy, reasoning-capable model. Excellent for complex medical QA.",
+    id: "llama3-8b",
+    name: "Llama 3.1 8B Instant",
+    provider: "Meta (via Groq)",
+    desc: "Fast, low-latency open-weight model. Good baseline for quick runs.",
+    badge: "LIVE API",
+    badgeColor: "text-accent3 border-accent3/20 bg-accent3/5",
+  },
+  {
+    id: "llama3-70b",
+    name: "Llama 3.3 70B Versatile",
+    provider: "Meta (via Groq)",
+    desc: "Larger open-weight model, stronger reasoning, still served at low latency by Groq.",
+    badge: "LIVE API",
+    badgeColor: "text-accent3 border-accent3/20 bg-accent3/5",
+  },
+  {
+    id: "gpt-oss-120b",
+    name: "GPT-OSS 120B",
+    provider: "OpenAI (via Groq)",
+    desc: "Open-weight flagship model with reasoning capabilities, served on Groq's LPU hardware.",
     badge: "LIVE API",
     badgeColor: "text-accent3 border-accent3/20 bg-accent3/5",
   },
@@ -28,6 +44,14 @@ const models = [
     desc: "Open-source model simulation. Demonstrates open vs closed model comparison.",
     badge: "SIMULATED",
     badgeColor: "text-warn border-warn/20 bg-warn/5",
+  },
+  {
+    id: "oracle",
+    name: "Ground-Truth Oracle",
+    provider: "Scripted baseline",
+    desc: "Always returns the exact ground-truth answer. Fixed reference point for comparison, not a model.",
+    badge: "BASELINE",
+    badgeColor: "text-muted border-muted/20 bg-muted/5",
   },
 ];
 
